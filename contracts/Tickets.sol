@@ -70,13 +70,11 @@ contract Tickets {
         UserOutcome result = users.getUser(id);
 
         // TODO - cast, based on type?
-        if (result.isType(UserOutcomeTypes.UserNotFoundOutcome)) {
-            require(result.isType(UserOutcomeTypes.UserSuccessOutcome), UserNotFoundOutcome(address(result)).message());
-        } else {
-            // TODO - destructure result
-            int user = UserSuccessOutcome(address(result)).result();
-            return user;
-        }
+        if (result.isType(UserOutcomeTypes.UserNotFoundOutcome)) revert(UserNotFoundOutcome(address(result)).message());
+
+        // TODO - destructure result
+        int user = UserSuccessOutcome(address(result)).result();
+        return user;
     }
 
 }
