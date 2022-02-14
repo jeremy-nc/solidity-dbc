@@ -11,8 +11,7 @@ contract UserOutcome {
     UserOutcomeTypes typee = UserOutcomeTypes.UserNoOutcome;
     
     function isType(UserOutcomeTypes t) public view
-    returns (bool)
-    {
+    returns (bool) {
         return typee == t;
     }
 }
@@ -30,37 +29,29 @@ contract UserSuccessOutcome is UserOutcome {
 
 contract UserNotFoundOutcome is UserOutcome {
     
-    int public message;
+    string public message;
 
-    constructor(int m) {
+    constructor(string memory m) {
         message = m;
         typee = UserOutcomeTypes.UserNotFoundOutcome;
     }
 
 }
 
+library UsersLib {
+    struct User {
+       string name;
+    }
+}
+
 contract Users {
 
-    constructor() {
-        int x = 0;
-        // Get User
-        UserOutcome result = getUser(1);
-
-        // TODO - cast, based on type?
-
-        // Handle result
-        if (result.isType(UserOutcomeTypes.UserSuccessOutcome)) {
-            x = UserSuccessOutcome(address(result)).result();
-        } else 
-        if (result.isType(UserOutcomeTypes.UserNotFoundOutcome)) {
-            x = UserNotFoundOutcome(address(result)).message();
-        }
-    }
+    constructor() { }
 
     function getUser(int id) public
     returns (UserOutcome result) {
         if (id < 0) {
-            return new UserNotFoundOutcome(id);
+            return new UserNotFoundOutcome("User not found for ID < 0");
         } else {
             return new UserSuccessOutcome(id);
         }
@@ -70,8 +61,22 @@ contract Users {
 
 contract Tickets {
 
-    constructor() {
+    Users users = new Users();
 
+    constructor() { }
+
+    function getUserById(int id) public 
+    returns (int userId) { // should be: string memory name, and all the attr of the user
+        UserOutcome result = users.getUser(id);
+
+        // TODO - cast, based on type?
+        if (result.isType(UserOutcomeTypes.UserNotFoundOutcome)) {
+            require(result.isType(UserOutcomeTypes.UserSuccessOutcome), UserNotFoundOutcome(address(result)).message());
+        } else {
+            // TODO - destructure result
+            int user = UserSuccessOutcome(address(result)).result();
+            return user;
+        }
     }
 
 }
